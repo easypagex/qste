@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>🚀 Misión Conversión — El Juego de la Página de Aterrizaje</title>
+<style>
+  :root{
+    --bg1:#ff2fd6; --bg2:#6a5cff; --bg3:#2bffb0; --accent:#ffe14d;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0; min-height:100vh; font-family:'Segoe UI',system-ui,sans-serif;
+    background:#0b0220;
+    color:#fff; display:flex; flex-direction:column; align-items:center;
+    padding:20px; padding-top:calc(20px + env(safe-area-inset-top));
+    padding-bottom:calc(20px + env(safe-area-inset-bottom));
+    overflow-x:hidden; position:relative;
+  }
+  .bg-blob{
+    position:fixed; border-radius:50%; filter:blur(70px); opacity:.55;
+    z-index:0; pointer-events:none; mix-blend-mode:screen;
+  }
+  .bg-blob.b1{width:60vmax; height:60vmax; top:-25vmax; left:-20vmax;
+    background:radial-gradient(circle,var(--bg1),transparent 70%);
+    animation:floatA 14s ease-in-out infinite;}
+  .bg-blob.b2{width:55vmax; height:55vmax; bottom:-25vmax; right:-20vmax;
+    background:radial-gradient(circle,var(--bg2),transparent 70%);
+    animation:floatB 16s ease-in-out infinite;}
+  .bg-blob.b3{width:45vmax; height:45vmax; top:35vh; left:50vw; transform:translateX(-50%);
+    background:radial-gradient(circle,var(--bg3),transparent 70%);
+    animation:floatC 18s ease-in-out infinite;}
+  @keyframes floatA{
+    0%,100%{transform:translate(0,0) scale(1);}
+    50%{transform:translate(8vw,6vh) scale(1.15);}
+  }
+  @keyframes floatB{
+    0%,100%{transform:translate(0,0) scale(1);}
+    50%{transform:translate(-6vw,-8vh) scale(1.1);}
+  }
+  @keyframes floatC{
+    0%,100%{transform:translate(-50%,0) scale(1);}
+    50%{transform:translate(-50%,5vh) scale(1.2);}
+  }
+  body > *:not(.bg-blob){position:relative; z-index:1;}
+
+  h1{
+    font-size:2.2em; text-align:center; margin:10px 0 4px;
+    background:linear-gradient(90deg,#ff2fd6,#6a5cff,#2bffb0,#ffe14d);
+    background-size:300% 300%;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:gradientMove 4s ease infinite;
+    filter:drop-shadow(0 0 18px rgba(255,47,214,.45));
+  }
+  @keyframes gradientMove{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+  }
+  .subtitle{
+    opacity:.95; text-align:center; margin-bottom:18px; max-width:600px;
+    color:#ffe9ff; text-shadow:0 0 12px rgba(255,110,196,.4);
+  }
+  .hud{
+    display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-bottom:18px;
+    width:100%; max-width:600px;
+  }
+  .stat{
+    background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.3);
+    backdrop-filter:blur(6px); border-radius:14px; padding:10px 18px; text-align:center;
+    min-width:100px; flex:1;
+  }
+  .stat .num{font-size:1.6em; font-weight:900; color:var(--accent); text-shadow:0 0 10px rgba(255,225,77,.6);}
+  .stat .label{font-size:.72em; opacity:.85; text-transform:uppercase; letter-spacing:.5px;}
+  #meterWrap{
+    width:100%; max-width:600px; background:rgba(255,255,255,.12); border-radius:20px;
+    height:24px; overflow:hidden; border:1px solid rgba(255,255,255,.3); margin-bottom:24px;
+  }
+  #meter{
+    height:100%; width:0%; background:linear-gradient(90deg,#ff2fd6,#2bffb0);
+    transition:width .4s ease; border-radius:20px;
+    box-shadow:0 0 14px rgba(43,255,176,.6);
+  }
+  .stage{
+    width:100%; max-width:680px; background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.22); border-radius:24px; padding:24px 18px;
+    backdrop-filter:blur(10px); box-shadow:0 10px 40px rgba(0,0,0,.4);
+    text-align:center; position:relative;
+  }
+  .round-tag{
+    display:inline-block; background:var(--accent); color:#1a0b2e; font-weight:900;
+    padding:4px 14px; border-radius:20px; font-size:.8em; margin-bottom:14px;
+    box-shadow:0 0 14px rgba(255,225,77,.5);
+  }
+  .scenario-emoji{font-size:3.2em; margin-bottom:6px;}
+  .scenario-title{
+    font-size:1.4em; font-weight:800; margin-bottom:10px;
+    color:#fff; text-shadow:0 0 14px rgba(106,92,255,.7);
+  }
+  .scenario-desc{opacity:.95; margin-bottom:22px; line-height:1.5; color:#f1e9ff;}
+  .choices{display:flex; gap:16px; flex-wrap:wrap; justify-content:center;}
+  .choice-btn{
+    flex:1; min-width:220px; max-width:260px; cursor:pointer; border:none;
+    border-radius:16px; padding:18px; font-size:1em; font-weight:800; color:#fff;
+    transition:transform .15s ease, box-shadow .15s ease;
+    -webkit-user-select:none; user-select:none; touch-action:manipulation;
+  }
+  .choice-btn:active{transform:scale(.97);}
+  .choice-btn:hover{transform:translateY(-4px) scale(1.02);}
+  .choice-btn.bad{background:linear-gradient(135deg,#6a5cff,#3b2fc9); box-shadow:0 6px 20px rgba(106,92,255,.4);}
+  .choice-btn.good{background:linear-gradient(135deg,#ff2fd6,#ff6a3d); box-shadow:0 6px 20px rgba(255,47,214,.4);}
+  .choice-sub{display:block; font-weight:400; font-size:.8em; margin-top:6px; opacity:.9;}
+  #feedback{
+    margin-top:20px; padding:16px; border-radius:14px; font-size:1.05em; font-weight:700;
+    display:none; animation:pop .3s ease;
+  }
+  @keyframes pop{from{transform:scale(.8); opacity:0;} to{transform:scale(1); opacity:1;}}
+  #feedback.correct{background:rgba(43,255,176,.18); border:1px solid #2bffb0; color:#bdfff0; text-shadow:0 0 8px rgba(43,255,176,.5);}
+  #feedback.wrong{background:rgba(255,47,214,.18); border:1px solid #ff2fd6; color:#ffd6f7; text-shadow:0 0 8px rgba(255,47,214,.5);}
+  #nextBtn{
+    margin-top:18px; background:var(--accent); color:#1a0b2e; border:none; padding:14px 28px;
+    border-radius:30px; font-weight:900; cursor:pointer; font-size:1em; display:none;
+    box-shadow:0 0 16px rgba(255,225,77,.5); touch-action:manipulation;
+  }
+  #nextBtn:active{transform:scale(.97);}
+  #nextBtn:hover{transform:scale(1.05);}
+  #finalScreen{display:none; text-align:center;}
+  #finalScreen h2{
+    font-size:2em; margin-bottom:8px;
+    background:linear-gradient(90deg,#ff2fd6,#6a5cff,#2bffb0,#ffe14d);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    background-size:300% 300%; animation:gradientMove 4s ease infinite;
+  }
+  .cta{
+    display:inline-block; margin-top:22px; background:linear-gradient(135deg,#ff2fd6,#6a5cff);
+    color:#fff; text-decoration:none; padding:16px 34px; border-radius:30px; font-weight:900;
+    font-size:1.1em; box-shadow:0 8px 28px rgba(255,47,214,.5);
+    transition:transform .2s ease; touch-action:manipulation;
+  }
+  .cta:active{transform:scale(.97);}
+  .cta:hover{transform:translateY(-3px) scale(1.04);}
+  footer{margin-top:30px; opacity:.75; font-size:.8em; text-align:center; padding-bottom:10px;}
+  footer a{color:var(--accent);}
+  .confetti{
+    position:fixed; top:-10px; font-size:1.4em; pointer-events:none; animation:fall linear forwards;
+    z-index:5;
+  }
+  @keyframes fall{
+    to{ transform:translateY(110vh) rotate(360deg); opacity:0; }
+  }
+
+  /* iPhone / pantallas pequeñas */
+  @media (max-width:480px){
+    h1{font-size:1.6em;}
+    .subtitle{font-size:.92em;}
+    .stat{min-width:80px; padding:8px 10px;}
+    .stat .num{font-size:1.25em;}
+    .stage{padding:20px 14px; border-radius:18px;}
+    .scenario-emoji{font-size:2.6em;}
+    .scenario-title{font-size:1.15em;}
+    .scenario-desc{font-size:.92em;}
+    .choice-btn{min-width:100%; padding:16px 14px;}
+    .cta{padding:14px 24px; font-size:1em;}
+  }
+</style>
+</head>
+<body>
+<div class="bg-blob b1"></div>
+<div class="bg-blob b2"></div>
+<div class="bg-blob b3"></div>
+
+
+<h1>🚀 Misión Conversión</h1>
+<p class="subtitle">Juega como un héroe del marketing digital. ¡Elige la mejor decisión en cada escenario y haz crecer tu Poder de Conversión! 🎯</p>
+
+<div class="hud">
+  <div class="stat"><div class="num" id="scoreNum">0</div><div class="label">Puntos</div></div>
+  <div class="stat"><div class="num" id="roundNum">1 / 6</div><div class="label">Ronda</div></div>
+  <div class="stat"><div class="num" id="streakNum">0</div><div class="label">Racha 🔥</div></div>
+</div>
+
+<div id="meterWrap"><div id="meter"></div></div>
+
+<div class="stage" id="stage">
+  <!-- contenido del juego inyectado aquí -->
+</div>
+
+<div class="stage" id="finalScreen">
+  <h2 id="finalTitle">🏆 ¡Misión Completada!</h2>
+  <p id="finalMsg"></p>
+  <p style="margin-top:14px; opacity:.85;">Cada decisión que acabas de tomar explica exactamente por qué una página de aterrizaje enfocada supera a un perfil disperso o una página de inicio genérica: objetivo claro, respuestas rápidas, confianza incorporada, trabajando para ti las 24 horas.</p>
+  <a class="cta" href="https://easypagex.github.io/expl/" target="_blank" rel="noopener">✨ Descubre por qué funcionan las páginas de aterrizaje →</a>
+  <br>
+  <button id="restartBtn" style="margin-top:18px; background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.3); color:#fff; padding:10px 22px; border-radius:24px; cursor:pointer; font-weight:700;">🔄 Jugar de nuevo</button>
+</div>
+
+<footer>
+  Inspirado en <a href="https://easypagex.github.io/expl/" target="_blank" rel="noopener">Por qué funcionan las páginas de aterrizaje</a> · Hecho para divertirse 🐾
+</footer>
+
+<script>
+/* ---------- Motor de Sonido (Web Audio, sin archivos externos) ---------- */
+let audioCtx = null;
+function getCtx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function playBellTone(freq, startTime, duration, gainPeak, ctx){
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0, startTime);
+  gain.gain.linearRampToValueAtTime(gainPeak, startTime + 0.012);
+  gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start(startTime);
+  osc.stop(startTime + duration + 0.05);
+}
+
+// campana brillante para respuestas correctas
+function playSuccessBell(){
+  const ctx = getCtx();
+  const t = ctx.currentTime;
+  playBellTone(1318.5, t, 1.1, 0.22, ctx);
+  playBellTone(1976.0, t+0.02, 0.9, 0.14, ctx);
+  playBellTone(2637.0, t+0.04, 0.7, 0.08, ctx);
+}
+
+// sonido cómico para respuestas incorrectas
+function playCowbell(){
+  const ctx = getCtx();
+  const t = ctx.currentTime;
+  [587.3, 845.6].forEach((freq,i)=>{
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'square';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.22, t);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(t);
+    osc.stop(t + 0.4);
+  });
+}
+
+// campanillas de celebración al terminar todas las rondas
+function playFinishBells(){
+  const ctx = getCtx();
+  const t = ctx.currentTime;
+  const notes = [1046.5, 1318.5, 1568.0, 2093.0, 1568.0, 2637.0];
+  notes.forEach((freq, i)=>{
+    const start = t + i*0.18;
+    playBellTone(freq, start, 1.0, 0.2, ctx);
+    if(i % 2 === 0) playBellTone(freq*1.5, start+0.01, 0.7, 0.08, ctx);
+  });
+}
+/* ------------------------------------------------------------------ */
+
+const rounds = [
+  {
+    emoji:"🐱",
+    title:"El Instagram del Cuidador de Gatos",
+    desc:"Un negocio de cuidado de gatos solo publica en Instagram con fotos aleatorias. Un posible cliente llega al perfil. ¿Qué es lo que mejor convierte?",
+    options:[
+      {text:"Seguir desplazándose por publicaciones antiguas", sub:"Esperando que encuentren la info de reserva eventualmente", good:false, explain:"Los visitantes deciden en segundos: hacerles buscar la información los pierde rápidamente."},
+      {text:"Enviarlos a una página de aterrizaje enfocada", sub:"Fotos + precios + un gran botón 'Reservar Ahora'", good:true, explain:"Un objetivo claro, una acción clara = muchas más reservas."}
+    ]
+  },
+  {
+    emoji:"📣",
+    title:"Publicar un Anuncio en Facebook",
+    desc:"Estás gastando dinero real en anuncios para el lanzamiento de un nuevo producto. ¿A dónde debería llevar el enlace del anuncio?",
+    options:[
+      {text:"A tu página de inicio general", sub:"Menús, blog, Sobre nosotros, formulario de contacto perdido en la nav", good:false, explain:"Las distracciones matan las conversiones: los visitantes se pierden antes de comprar."},
+      {text:"A una página de aterrizaje dedicada al producto", sub:"Oferta única y enfocada, un solo CTA", good:true, explain:"Tráfico de pago + página de aterrizaje enfocada = la combinación más potente del marketing."}
+    ]
+  },
+  {
+    emoji:"⏱️",
+    title:"La Prueba de los 8 Segundos",
+    desc:"Un visitante llega a tu página. Tienes unos 8 segundos antes de que decida quedarse o irse. ¿Qué debería ver de inmediato?",
+    options:[
+      {text:"Un muro de historia de la empresa", sub:"Fundada en 1998... nuestra misión... nuestro equipo...", good:false, explain:"Nadie lee tu historia antes de decidir si eres relevante para ellos."},
+      {text:"Qué haces, para quién y por qué importa", sub:"Título claro + valor claro, al instante", good:true, explain:"Responde las preguntas del visitante de inmediato, o los perderás."}
+    ]
+  },
+  {
+    emoji:"🤝",
+    title:"Construyendo Confianza",
+    desc:"La confianza es la barrera número 1 que impide que la gente reserve o compre. ¿Qué ayuda más?",
+    options:[
+      {text:"Un banner genérico con foto de stock", sub:"Se ve bien, no dice nada real", good:false, explain:"Las fotos de stock no generan confianza: la prueba sí lo hace."},
+      {text:"Testimonios, reseñas y resultados antes/después", sub:"Prueba social real de personas reales", good:true, explain:"La prueba social reduce la duda y motiva la acción."}
+    ]
+  },
+  {
+    emoji:"🌙",
+    title:"Son las 2 de la Madrugada",
+    desc:"Un posible cliente está navegando a las 2 AM, listo para reservar. Tu negocio está dormido. ¿Qué pasa?",
+    options:[
+      {text:"Tiene que esperar a que te despiertes y respondas", sub:"Sin información, sin forma de actuar ahora", good:false, explain:"Para la mañana, las ganas de comprar pueden haberse esfumado."},
+      {text:"La página de aterrizaje lo explica todo y le permite actuar ahora", sub:"Trabajando 24/7 como un vendedor incansable", good:true, explain:"Una buena página de aterrizaje nunca duerme: convierte a cualquier hora."}
+    ]
+  },
+  {
+    emoji:"🎯",
+    title:"La Llamada a la Acción Final",
+    desc:"Tu página de aterrizaje se ve genial. Es el momento del cierre. ¿Qué cierra el trato?",
+    options:[
+      {text:"Varios enlaces a diferentes páginas", sub:"¡Elige tu propia aventura!", good:false, explain:"Demasiadas opciones = parálisis de decisión = nadie hace clic en nada."},
+      {text:"Un botón único, llamativo y obvio", sub:"'Reservar Ahora' / 'Empezar' — imposible de ignorar", good:true, explain:"Un camino claro hacia la acción es lo que convierte el interés en cliente."}
+    ]
+  }
+];
+
+let current = 0, score = 0, streak = 0;
+const stage = document.getElementById('stage');
+const scoreNum = document.getElementById('scoreNum');
+const roundNum = document.getElementById('roundNum');
+const streakNum = document.getElementById('streakNum');
+const meter = document.getElementById('meter');
+const finalScreen = document.getElementById('finalScreen');
+
+function renderRound(){
+  const r = rounds[current];
+  roundNum.textContent = `${current+1} / ${rounds.length}`;
+  const shuffled = Math.random() > 0.5 ? r.options : [r.options[1], r.options[0]];
+  stage.innerHTML = `
+    <span class="round-tag">RONDA ${current+1}</span>
+    <div class="scenario-emoji">${r.emoji}</div>
+    <div class="scenario-title">${r.title}</div>
+    <div class="scenario-desc">${r.desc}</div>
+    <div class="choices">
+      ${shuffled.map((o,i)=>`
+        <button class="choice-btn ${o.good?'good':'bad'}" data-good="${o.good}" data-explain="${encodeURIComponent(o.explain)}">
+          ${o.text}<span class="choice-sub">${o.sub}</span>
+        </button>`).join('')}
+    </div>
+    <div id="feedback"></div>
+    <button id="nextBtn">Siguiente Ronda →</button>
+  `;
+  stage.querySelectorAll('.choice-btn').forEach(btn=>{
+    btn.addEventListener('click', onChoice);
+  });
+}
+
+function onChoice(e){
+  const btns = stage.querySelectorAll('.choice-btn');
+  btns.forEach(b=>b.style.pointerEvents='none');
+  const good = e.currentTarget.dataset.good === 'true';
+  const explain = decodeURIComponent(e.currentTarget.dataset.explain);
+  const fb = document.getElementById('feedback');
+  fb.style.display = 'block';
+  if(good){
+    score += 100 + streak*10;
+    streak++;
+    fb.className = 'correct';
+    fb.textContent = `✅ ¡Buena jugada! +${100+(streak-1)*10} pts — ${explain}`;
+    playSuccessBell();
+    burstConfetti();
+  } else {
+    streak = 0;
+    fb.className = 'wrong';
+    fb.textContent = `❌ No del todo — ${explain}`;
+    playCowbell();
+  }
+  scoreNum.textContent = score;
+  streakNum.textContent = streak;
+  meter.style.width = Math.min(100, (current+1)/rounds.length*100) + '%';
+  document.getElementById('nextBtn').style.display = 'inline-block';
+  document.getElementById('nextBtn').onclick = ()=>{
+    current++;
+    if(current < rounds.length){
+      renderRound();
+    } else {
+      showFinal();
+    }
+  };
+}
+
+function showFinal(){
+  stage.style.display = 'none';
+  finalScreen.style.display = 'block';
+  playFinishBells();
+  const max = rounds.length*100 + (rounds.length-1)*rounds.length*5;
+  let title, msg;
+  if(score >= 600){
+    title = "🏆 ¡Maestro de la Conversión!";
+    msg = `Conseguiste ${score} puntos con instintos afilados. Claramente entiendes por qué las páginas de aterrizaje enfocadas ganan.`;
+  } else if(score >= 300){
+    title = "🎯 ¡Buen Marketero!";
+    msg = `Conseguiste ${score} puntos. Buenos instintos: un poco más de enfoque y convertirás como un profesional.`;
+  } else {
+    title = "🌱 Empezando el Camino";
+    msg = `Conseguiste ${score} puntos. No te preocupes: ahora conoces el secreto: enfoque, velocidad, confianza y una llamada a la acción clara.`;
+  }
+  document.getElementById('finalTitle').textContent = title;
+  document.getElementById('finalMsg').textContent = msg;
+}
+
+document.getElementById('restartBtn').addEventListener('click', ()=>{
+  current=0; score=0; streak=0;
+  scoreNum.textContent=0; streakNum.textContent=0; meter.style.width='0%';
+  finalScreen.style.display='none'; stage.style.display='block';
+  renderRound();
+});
+
+function burstConfetti(){
+  const emojis = ['🎉','✨','🚀','💥','🎯'];
+  for(let i=0;i<14;i++){
+    const c = document.createElement('div');
+    c.className='confetti';
+    c.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    c.style.left = Math.random()*100+'vw';
+    c.style.animationDuration = (1.5+Math.random()*1.5)+'s';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(), 3200);
+  }
+}
+
+renderRound();
+document.body.addEventListener('touchstart', ()=>{ getCtx(); }, {once:true, passive:true});
+document.body.addEventListener('click', ()=>{ getCtx(); }, {once:true});
+</script>
+</body>
+</html>
